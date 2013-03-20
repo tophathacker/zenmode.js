@@ -34,7 +34,7 @@
             var defaultcss = {
                 'zen-mode':{
                     'background-color':'white',
-                    'position': 'absolute'
+                    'position': 'fixed'
                 },
                 'zen-fullscreen':{
                     'top': '0',
@@ -45,7 +45,7 @@
                 },
                 'zen-background':{
                     'background-color':'white',
-                    'position':'absolute',
+                    'position':'fixed',
                     'top':'0',
                     'left':'0',
                     'height':'100%',
