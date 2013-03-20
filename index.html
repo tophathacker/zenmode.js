@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>zenmode.js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="zenmode.js is a client side jQuery plugin to show HTML elements in a Zen way">
+    <meta name="author" content="Ryan Hatfield">
+
+    <!-- Le styles -->
+    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <style style type="text/css">
+      body {
+        padding-top: 20px;
+        padding-bottom: 40px;
+        display:none;
+      }
+
+      /* Custom container */
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 700px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      #therest {
+        display:none;
+      }
+    </style>
+
+  </head>
+
+  <body =>
+    
+    <!-- change this to a 'bulid menu' function later -->
+    <div class="container-narrow">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li ><a href="#">Home</a></li>
+          <li ><a href="#">About</a></li>
+          <li ><a href="#">Help</a></li>
+        </ul>
+        <h3 class="muted">zenmode.js</h3>
+      </div>
+      <hr>
+
+      <!--body stuff here-->
+      <div class="row">
+        <div class='span7 auto-toggle-zen' data-options='{"fullscreen":"false"}' data-autozen='true'>
+          <h2>Welcome to zenmode.js! Double click me!</h2>
+        </div>
+        <div class='span7'>
+          <p> Well as you can see, zenmode.js is a clean and easy way to hide everything else on a page but the HTML element you want to focus on</p>
+          <p> click "Enter Zen Mode" below, and see what happens to the textarea Element</p>
+        </div>
+        <div class='span7' id='textarea'>
+          <textarea style="height:100%; width:100%">This could be the text in your webiste editor, or the comments section of your blog!</textarea>
+          <a href="#" >Enter Zen Mode</a>
+        </div>
+      </div>
+
+      <br />
+      <div class="row" id='therest'>
+        <div class='span7'>
+
+          <p>Now wasn't that cool? This box is now shown because of the jQuery that was in the callback function of the toggleZen() function. We'll get to that in a minute, but for now let's go over some simple examples.</p>
+        </div>
+      </div>
+      <!--end body stuff-->
+      <hr>
+
+        <div class="footer">
+          <p>&copy; zenmode.js 2013</p>
+        </div>
+
+</div> <!-- /container -->
+
+<!-- Le javascript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
+<script type='text/javascript' src="zenmode.js"></script>
+<script type='text/javascript'>
+(function($){
+  //body is hidden when the page loads, so there is no flicker
+  $('body').show();
+  $('#textarea').find('a').on('click',function(event){
+    //don't scrll page to the top
+    event.preventDefault();
+    $(this).closest('#textarea').toggleZen({},
+      function(){
+        $('#textarea').find('a').text('Leave Zen Mode');
+      },
+      function(){
+        $('#textarea').find('a').text('Enter Zen Mode'); 
+        $('#therest').slideDown();
+      });
+  });
+})(jQuery);
+
+</script>
+</body>
+</html>
