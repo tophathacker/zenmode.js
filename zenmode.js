@@ -13,84 +13,100 @@
 */
 
 (function($){
-
     $.fn.extend({ 
-
         goZen: function(options,callback) {
+            var obj = $(this);
             //make sure it's not already in zen mode
-            if ($(this).checkZen())
+            if (obj.checkZen())
                 return;
-            //look for zen modes in place.. and if there are any, take them out and 
-            //Settings list and the default values
             var defaultoptions = {
-                animate : false,
-                dark : false,
-                fullscreen : true,
-                background : '',
-                dblclick : false,
-                nocss : false
-            };
+                reset: {
+                    top:'',
+                    left:'',
+                    width:'',
+                    height:'',
+                    position:'',
+                    'margin':'',
+                    'background-color':'',
+                    'overflow':''                    
+                },
+                fullscreen: {
+                    top: 20,
+                    left: 20,
+                    width:$(window).width() - 40,
+                    height:$(window).height() - 60
+                },
+                tempcss: {
 
-            var defaultcss = {
-                'zen-mode':{
-                    'background-color':'white',
-                    'position': 'fixed'
+                    top: 0,
+                    left: 0,
+                    position: 'fixed',
+                    width: obj.width(),
+                    height: obj.height(),
+                    margin: 0
                 },
-                'zen-fullscreen':{
-                    'top': '0',
-                    'left': '0',
-                    'height':'80%',
-                    'width':'90%',
-                    'margin':'5%'
-                },
-                'zen-background':{
+                overlay: {
+                    position:'fixed',
+                    top:0,
+                    left:0,
+                    width:$(window).width(),
+                    height:$(window).height(),
                     'background-color':'white',
-                    'position':'fixed',
-                    'top':'0',
-                    'left':'0',
-                    'height':'100%',
-                    'width':'100%'
+                    display:'none'
+                },
+                config: {
+                    fullscreen: true,
+                    animateoff: false,
+                    overlayfade: true,
+                    registerevent: '',
+                    autozen: false
                 }
             };
-            options = $.extend(defaultoptions, options);
-            var stylesheet = '<style type="text/css" id="zenstyle">'
-            $.each(defaultcss, function(classname,classarray){
-                stylesheet += '\n.' + classname + '{';
-                $.each(classarray, function(tag,value){
-                    stylesheet += '\n' + tag + ':' + value + ';';
+            
+            if(options)
+                $.each(options,function(index,value){
+                    options[index] = $.extend(defaultoptions[index], options[index]);
                 });
-                stylesheet += '\n}';
-            });
-            stylesheet += '</style>';
+            options = $.extend(defaultoptions,options);
 
-            //make sure there is no style already
-            if($('#zenstyle').length != 0)
-                $('#zenstyle').remove();
-            //make sure they want css then output the stylesheet
-            if(!options.nocss)
-                $('head').append(stylesheet);
-            //add background div
-            if($('.zen-background').length == 0)
-                $('body').prepend('<div class="zen-background"></div>');
+            var tempcss = options.tempcss;
+            //make sure to set top and left for scroll bars
+            var offset = obj.offset();
+            tempcss.top = offset.top - $(window).scrollTop();
+            tempcss.left = offset.left - $(window).scrollLeft();
+            obj.data('tempcss',tempcss);
+            obj.data('resetcss',options.reset);
+            obj.before("<div id='zen-overlay'></div>");
+            var overlay = $('#zen-overlay');
+            overlay.css(options.overlay); 
+            obj.addClass('zen-mode');
+            obj.css(tempcss);
+            if(options.config.overlayfade == true)
+                overlay.fadeIn(function(){handleAnimation();});
+            else
+                overlay.show(function(){handleAnimation();});
 
-            //add zen classes
-            var zenclasses = 'zen-mode';
-            if(options.dark == true) zenclasses += ' zen-dark';
-            if(options.fullscreen == true) zenclasses += ' zen-fullscreen';
-
-            $(this).addClass(zenclasses);
-
-            //do all the dblclick jazz
-            if(options.dblclick) $(this).on('dblclick',function(){
-                $(this).unZen();
-            });
-
-            //make sure callback is valid
-            if(typeof callback == 'function')
-                callback();
-
-            //only apply to first
-            return this;
+            var handleAnimation = function(){
+                obj.css(tempcss);
+                if(options.config.fullscreen == true)
+                    if(options.config.animateoff != true){
+                        obj.animate(options.fullscreen,function(){
+                            //run callback if it's valid
+                            if(typeof callback == 'function')
+                                callback();
+                            //only apply to first
+                            return this;
+                        });
+                    }
+                    else{
+                        obj.css(options.fullscreen);
+                        //run callback if it's valid
+                        if(typeof callback == 'function')
+                            callback();
+                        //only apply to first
+                        return this;
+                    }
+            };
         },
 
         ooohhhmmm: function(options,callback){
@@ -110,36 +126,55 @@
         },
 
         unZen: function(options,callback) {
-            //get rid of the zen style? might not need to do this.
-            // should get rid of it in case it messes with someone's css
-            if($('#zenstyle').length != 0)
-                $('#zenstyle').remove();
-            //get rid of the background div
-            if($('.zen-background').length != 0)
-                $('.zen-background').remove();
+            var obj = $(this);
+            if(obj.hasClass('zen-mode'))
+              {
+                obj.removeClass('zen-mode')
+                obj.animate(obj.data('tempcss'),function(){
+                    if(obj.data('resetcss'))obj.css(obj.data('resetcss'));
+                  $('#zen-overlay').fadeOut(function(){
+                    obj.removeClass('zen-mode');
+                    if(obj.data('tempcss'))obj.data('tempcss','');
+                    if(obj.data('resetcss'))obj.data('resetcss','');
+                    $('#zen-overlay').remove();
 
-            //get rid of the class, could use $('.zen-mode') .. I'll do some testing
-            $('.zen-mode').removeClass('zen-mode zen-dark zen-fullscreen zen-animate');
+                    //run callback if it's valid
+                    if(typeof callback == 'function')
+                        callback();
+                    return this;
+                  });
+                });
+              }
+        },
 
-            //run callback if it's valid
-            if(typeof callback == 'function')
-                callback();
-            return this;
+        setupZenEvents: function(){
+            //this this is the value passed in
+            $('[data-zenoptions]').each(function(){
+                //this this is the Element
+                var obj = $(this);
+                var options = obj.data('zenoptions');
+                $.each(options, function(index,value){
+                    switch(index)
+                    {
+                        case 'config':
+                            if(value.hasOwnProperty('registerevent'))
+                                obj.on(value.registerevent,function(){
+                                    $(this).toggleZen(options);
+                                });
+                            if(value.hasOwnProperty('autozen'))
+                                $(this).toggleZen(options);
+                            break;
+                    }
+                });
+                $(this).on()
+            });
         }
     });
-    //for each Element in the DOM that has the auto-toggle-zen class,
-    // add a simple toggle event. I'll flush this out later
-    $('.auto-toggle-zen').on('dblclick', function(){
-        document.getSelection().removeAllRanges();
-        $(this).toggleZen($(this).data('options'),function(){},function(){});
-    });
-    $('.auto-toggle-zen').each(function(i,obj){
-        if($(obj).data('autozen'))
-        {
-            var options = {};
-            if($(obj).data('options'))
-                options = $(obj).data('options');
-            $(obj).toggleZen(options);
-        }
+
+    $(window).resize(function(){
+            console.log('resize zen');
+        $('.zen-mode').each(function(){
+            $(this).css({width:$(window).width()-40,height:$(window).height()-60});
+        });
     });
 })(jQuery);

@@ -7,7 +7,6 @@
     <meta name="description" content="zenmode.js is a client side jQuery plugin to show HTML elements in a Zen way">
     <meta name="author" content="Ryan Hatfield">
 
-    <!-- Le styles -->
     <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
     <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet">
 
@@ -32,49 +31,69 @@
         margin: 30px 0;
       }
 
+      #textarea textarea{
+        padding:0;
+        margin:0;
+        display:block;
+        resize:none;
+      }
+
       #therest {
         display:none;
+      }
+
+      #example1-container .CodeMirror {
+        height:100px;
       }
     </style>
 
   </head>
 
   <body>
-    <a href="https://github.com/tophathacker/zenmode.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="fork-me.png" alt="Fork me on GitHub"></a>
 
     <!-- change this to a 'bulid menu' function later -->
     <div class="container-narrow">
 
       <div class="masthead">
-        <ul class="nav nav-pills pull-right">
-          <li ><a href="#">Home</a></li>
-          <li ><a href="#">About</a></li>
-          <li ><a href="#">Help</a></li>
-        </ul>
         <h3 class="muted">zenmode.js</h3>
       </div>
       <hr>
 
       <!--body stuff here-->
-      <div class="row">
-        <div class='span7 auto-toggle-zen' data-options='{"fullscreen":"false"}' data-autozen='true'>
+      <div class="row-fluid">
+        <div class='span12' data-zenoptions='{"config":{"fullscreen":"false","registerevent":"click"}}'>
           <h2>Welcome to zenmode.js! Double click me!</h2>
         </div>
-        <div class='span7'>
+        <div class='span12'>
           <p> Well as you can see, zenmode.js is a clean and easy way to hide everything else on a page but the HTML element you want to focus on</p>
+          <h4><a href="zenmode.js" class="btn btn-success">Download zenmode.js</a></h4>
           <p> click "Enter Zen Mode" below, and see what happens to the textarea Element</p>
         </div>
-        <div class='span7' id='textarea'>
-          <textarea style="height:100%; width:100%">This could be the text in your webiste editor, or the comments section of your blog!</textarea>
-          <a href="#" >Enter Zen Mode</a>
-        </div>
+          <div class='span12' id='textarea'>
+            <textarea>This could be the text in your webiste editor, or the comments section of your blog!</textarea>
+            <a href="#" >Enter Zen Mode</a>
+          </div>
       </div>
 
       <br />
       <div class="row" id='therest'>
         <div class='span7'>
-
           <p>Now wasn't that cool? This box is now shown because of the jQuery that was in the callback function of the toggleZen() function. We'll get to that in a minute, but for now let's go over some simple examples.</p>
+          <br />
+          <p>First things first, zenmode.js relies on jQuery to function, so make sure to include that. Here's an example of getting the jquery.min.js file from Google's Content Delivery Network (<a href="http://en.wikipedia.org/wiki/Content_delivery_network" title="Content Delivery Network">CDN</a>) and the zenmode.js file you can download from above.
+        </div>
+        <br />
+        <div class='span7'>
+          <script src="https://gist.github.com/tophathacker/5202452.js?file=script_tags.html"></script>
+        </div>
+        <br />
+        <div class='span7' id='example1-container'>
+          <p>Here's the editor from the folks over at <a href="http://codemirror.net/">CodeMirror</a>. There's two buttons at the bottom this time, one for zen mode and one to run the code. Yup, you can execute the code in this editor, go nuts!</p><p>(HINT: try typing in $('#example1').toggleZen() and hit Run Example 1)</p>
+          <br />
+          <div id='example1'>
+            <h3 class="muted">I'm working on this... stay tuned!</h3>
+            <a href="#" class="btn" id="runexample1">Run Example 1</a>
+          </div>
         </div>
       </div>
       <!--end body stuff-->
@@ -85,28 +104,67 @@
         </div>
 
 </div> <!-- /container -->
+    <!-- I put this at the end so it stays on top :) -->
+    <a href="https://github.com/tophathacker/zenmode.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="fork-me.png" alt="Fork me on GitHub"></a>
 
-<!-- Le javascript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
 <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
+<script type='text/javascript' src='http://twitter.github.com/bootstrap/assets/js/bootstrap.js'></script>
+
 <script type='text/javascript' src="zenmode.js"></script>
 <script type='text/javascript'>
 (function($){
   //body is hidden when the page loads, so there is no flicker
   $('body').show();
+
+  //code for first textarea
   $('#textarea').find('a').on('click',function(event){
-    //don't scrll page to the top
-    event.preventDefault();
-    $(this).closest('#textarea').toggleZen({},
-      function(){
-        $('#textarea').find('a').text('Leave Zen Mode');
-      },
-      function(){
-        $('#textarea').find('a').text('Enter Zen Mode'); 
-        $('#therest').slideDown();
-      });
+  //don't scrll page to the top
+  event.preventDefault();
+  $(this).closest('#textarea').toggleZen({},
+    function(){
+      $('#textarea').find('textarea').animate({width:$(window).width()-40,height:$(window).height()-60});
+      $('#textarea').find('a').text('Leave Zen Mode').fadeIn();
+    },
+    function(){
+      $('#textarea').find('a').text('Enter Zen Mode').fadeIn();
+      $('#therest').slideDown();
+    });
   });
+
+  $('#textarea').find('a').on('click',function(event){
+      $(this).fadeOut();
+      $('#textarea').find('textarea').css({width:'',height:''});
+  });
+  //end first textarea
+
+  // code for gist double click
+  $('#gist5202452').on('click',function(){
+    $(this).toggleZen();
+  });
+
+  /*
+  //code for example1
+  var myCodeMirror = CodeMirror(function(elt){
+      $('#example1').prepend(elt);
+    }, {
+      mode:  "javascript"
+    }
+  );
+
+  $('#runexample1').on('click',function(event){
+
+    //show another hint if that it goes to zen-mode and back
+    if($('#example1').hasClass('zen-mode'))
+      alert('');
+    //stop the browser from moving to the top
+    event.preventDefault();
+    eval(myCodeMirror.getValue()); //remember kids, normally eval is a bad thing :)
+
+  });
+  //end example1
+  */
+
+  $(this).setupZenEvents();
 })(jQuery);
 
 </script>
